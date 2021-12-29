@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel/text"
 )
 
@@ -19,14 +18,14 @@ func NewTextBuffer() TextBuffer {
 	return buf
 }
 
-func (tb *TextBuffer) Draw(win *pixelgl.Window) {
+func (tb *TextBuffer) Draw(ctx Context) {
 	tb.txt.Clear()
 	tb.txt.WriteString(string(tb.Buf))
-	tb.txt.Draw(win, pixel.IM)
+	tb.txt.Draw(ctx.win, pixel.IM)
 }
 
 func (tb *TextBuffer) WriteString(s string) {
-	if !tb.readonly {
+	if tb.readonly {
 		println("buffer is readonly") // TODO(brysen): replace with in editor error messaging
 		return
 	}
@@ -34,7 +33,7 @@ func (tb *TextBuffer) WriteString(s string) {
 }
 
 func (tb *TextBuffer) WriteRune(r rune) {
-	if !tb.readonly {
+	if tb.readonly {
 		println("buffer is readonly") // TODO(brysen): replace with in editor error messaging
 		return
 	}

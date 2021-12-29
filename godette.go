@@ -13,6 +13,7 @@ type Context struct {
 	keyListeners  []KeyListener
 	CurrentBuffer *TextBuffer
 	Buffers       []*TextBuffer
+	Cursor        *Cursor
 }
 
 type KeyListener struct {
@@ -55,6 +56,22 @@ func run() {
 		// TODO(brysen): show current directory in new buffer and make it the active buffer
 	}})
 
+	c := NewCursor(ctx)
+	ctx.Cursor = c
+
+	ctx.keyListeners = append(ctx.keyListeners, KeyListener{name: "move cursor up", key: pixelgl.KeyUp, mod: -1, exec: func(ctx Context) {
+		ctx.Cursor.Position = ctx.Cursor.Position.Add(pixel.V(0, ctx.Cursor.Height))
+	}})
+	ctx.keyListeners = append(ctx.keyListeners, KeyListener{name: "move cursor down", key: pixelgl.KeyDown, mod: -1, exec: func(ctx Context) {
+		ctx.Cursor.Position = ctx.Cursor.Position.Sub(pixel.V(0, ctx.Cursor.Height))
+	}})
+	ctx.keyListeners = append(ctx.keyListeners, KeyListener{name: "move cursor left", key: pixelgl.KeyLeft, mod: -1, exec: func(ctx Context) {
+		ctx.Cursor.Position = ctx.Cursor.Position.Sub(pixel.V(ctx.Cursor.Width, 0))
+	}})
+	ctx.keyListeners = append(ctx.keyListeners, KeyListener{name: "move cursor right", key: pixelgl.KeyRight, mod: -1, exec: func(ctx Context) {
+		ctx.Cursor.Position = ctx.Cursor.Position.Add(pixel.V(ctx.Cursor.Width, 0))
+	}})
+
 	for !win.Closed() {
 		ctx.CurrentBuffer.WriteString(win.Typed())
 
@@ -62,9 +79,10 @@ func run() {
 
 		win.Clear(colornames.Lightcoral)
 
-		// TODO(brysen): draw cursor
+		c.Update()
+		c.Draw(ctx)
 
-		ctx.CurrentBuffer.Draw(win)
+		ctx.CurrentBuffer.Draw(ctx)
 		win.Update()
 
 		<-fps
